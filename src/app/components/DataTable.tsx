@@ -10,7 +10,6 @@ import {
   TablePagination,
   Checkbox,
   IconButton,
-  Chip,
   Menu,
   MenuItem,
 } from '@mui/material'
@@ -23,6 +22,7 @@ interface Column {
   minWidth?: number
   align?: 'right' | 'left' | 'center'
   format?: (value: any) => React.ReactNode
+  renderItem?: (row: any) => React.ReactNode
 }
 
 interface DataTableProps {
@@ -96,8 +96,8 @@ const DataTable = ({
 
   return (
     <>
-      <TableContainer sx={{ maxHeight: 'calc(100vh - 400px)' }}>
-        <Table stickyHeader>
+      <TableContainer>
+        <Table>
           <TableHead>
             <TableRow>
               {selectable && (
@@ -106,6 +106,7 @@ const DataTable = ({
                     indeterminate={selectedRows.length > 0 && selectedRows.length < rows.length}
                     checked={isAllSelected}
                     onChange={handleSelectAll}
+                    size='small'
                   />
                 </TableCell>
               )}
@@ -140,6 +141,7 @@ const DataTable = ({
                       <Checkbox
                         checked={selected}
                         onChange={(e) => handleSelectRow(e, row)}
+                        size='small'
                       />
                     </TableCell>
                   )}
@@ -147,7 +149,11 @@ const DataTable = ({
                     const value = row[column.id]
                     return (
                       <TableCell key={column.id} align={column.align || 'left'}>
-                        {column.format ? column.format(value) : value}
+                        {column.renderItem
+                          ? column.renderItem(row)
+                          : column.format
+                            ? column.format(value)
+                            : value}
                       </TableCell>
                     )
                   })}

@@ -1,5 +1,5 @@
 import { Card, CardContent, Box, Typography } from '@mui/material'
-import { LucideIcon, ArrowRight } from 'lucide-react'
+import { LucideIcon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 interface MetricCardProps {
@@ -49,8 +49,8 @@ const MetricCard = ({ title, value, icon: Icon, iconColor, bgColor, route }: Met
               border: `1px solid ${iconColor}20`,
             }}
           >
-            <Icon 
-              size={20} 
+            <Icon
+              size={20}
               style={{ color: iconColor }}
             />
           </Box>

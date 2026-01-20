@@ -1,15 +1,16 @@
-import { Box, Typography, IconButton } from '@mui/material'
-import { 
-  LayoutDashboard, 
-  LogOut, 
-  Package, 
-  Calendar, 
-  Scale, 
+import { Box, Typography, IconButton, Avatar } from '@mui/material'
+import {
+  LayoutDashboard,
+  Package,
+  Calendar,
+  Scale,
   HelpCircle,
-  Menu,
-  ChevronLeft
+  ChevronLeft,
+  ChevronRight,
+  LogOut
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
+const logoImage = '/assets/dcm-logo.png'
 
 interface NavItem {
   label: string
@@ -26,7 +27,7 @@ const Sidebar = ({ isOpen = true, onToggle }: SidebarProps) => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const navItems: NavItem[] = [
+  const mainMenuItems: NavItem[] = [
     { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
     { label: 'Products', icon: Package, path: '/products' },
     { label: 'Schedules', icon: Calendar, path: '/schedules' },
@@ -45,13 +46,11 @@ const Sidebar = ({ isOpen = true, onToggle }: SidebarProps) => {
     <Box
       sx={{
         width: isOpen ? 260 : 80,
-        height: 'calc(100vh - 70px)',
-        bgcolor: '#ffffff',
-        borderRight: '1px solid',
-        borderColor: '#e2e8f0',
+        height: '100vh',
+        bgcolor: '#1e3a5f',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '1px 0 2px rgba(0, 0, 0, 0.02)',
+        boxShadow: '2px 0 8px rgba(0, 0, 0, 0.1)',
         transition: 'width 0.3s ease',
         position: 'relative',
       }}
@@ -61,31 +60,72 @@ const Sidebar = ({ isOpen = true, onToggle }: SidebarProps) => {
         onClick={onToggle}
         sx={{
           position: 'absolute',
-          right: -16,
-          top: 20,
-          transform: 'translateY(0)',
-          color: '#64748b',
-          bgcolor: '#ffffff',
-          width: 30,
-          height: 30,
-          border: '1px solid',
-          borderColor: '#4c81f4',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          right: -18,
+          top: 65,
+          transform: 'translateY(-50%)',
+          color: '#ffffff',
+          bgcolor: '#1e3a5f',
+          width: 34,
+          height: 34,
+          border: '2px solid',
+          borderColor: '#ffffff',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1)',
           borderRadius: '50%',
-          zIndex: 10,
+          zIndex: 30,
+          transition: 'all 0.2s ease',
           '&:hover': {
-            bgcolor: '#2563eb',
-            borderColor: '#2563eb',
-            color: '#e5e7eb',
+            bgcolor: '#1e3a5f',
+            transform: 'translateY(-50%) scale(1.05)',
+            boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.2)',
+          },
+          '&:active': {
+            transform: 'translateY(-50%) scale(0.95)',
           },
         }}
       >
-        {isOpen ? <ChevronLeft size={16} /> : <Menu size={16} />}
+        {isOpen ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
       </IconButton>
 
+      {/* Logo Section */}
+      <Box
+        sx={{
+          height: 70,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          px: 2.5,
+          borderBottom: '1px solid',
+          borderColor: 'rgba(255, 255, 255, 0.1)',
+        }}
+      >
+        <Box
+          sx={{
+            width: isOpen ? 'auto' : 80,
+            height: 60,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <img
+            src={logoImage}
+            alt="DCM Logo"
+            style={{
+              maxWidth: '100%',
+              maxHeight: '100%',
+              width: 'auto',
+              height: 'auto',
+              objectFit: 'contain',
+            }}
+          />
+        </Box>
+
+      </Box>
+
       {/* Navigation */}
-      <Box sx={{ flex: 1, px: isOpen ? 2 : 1, py: 2 }}>
-        {navItems.map((item) => {
+      <Box sx={{ flex: 1, overflowY: 'auto', px: isOpen ? 2 : 1, py: 2 }}>
+
+        {mainMenuItems.map((item) => {
           const Icon = item.icon
           const active = isActive(item.path)
           return (
@@ -103,10 +143,11 @@ const Sidebar = ({ isOpen = true, onToggle }: SidebarProps) => {
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
                 bgcolor: active ? '#2563eb' : 'transparent',
-                color: active ? '#ffffff' : '#64748b',
+                color: active ? '#ffffff' : 'rgba(255, 255, 255, 0.7)',
+                boxShadow: active ? '0 2px 8px rgba(37, 99, 235, 0.3)' : 'none',
                 '&:hover': {
-                  bgcolor: active ? '#1d4ed8' : '#f1f5f9',
-                  color: active ? '#ffffff' : '#1e293b',
+                  bgcolor: active ? '#1d4ed8' : 'rgba(255, 255, 255, 0.1)',
+                  color: '#ffffff',
                 },
               }}
               title={!isOpen ? item.label : ''}
@@ -120,38 +161,78 @@ const Sidebar = ({ isOpen = true, onToggle }: SidebarProps) => {
             </Box>
           )
         })}
+
+
       </Box>
 
-      {/* Logout */}
-      {isOpen && (
-        <Box sx={{ p: 2, borderTop: '1px solid', borderColor: '#e2e8f0' }}>
+      <Box sx={{
+        display: 'flex', alignItems: 'center', gap: 1, mb: 0.25, justifyContent: 'space-between',
+        p: 2,
+
+      }}>
+        {/* User Profile at Bottom */}
+        {isOpen && (
           <Box
-            onClick={() => {}}
             sx={{
+              borderTop: '1px solid',
+              borderColor: 'rgba(255, 255, 255, 0.1)',
               display: 'flex',
               alignItems: 'center',
               gap: 1.5,
-              p: 1.25,
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: '#cbd5e1',
-              color: '#475569',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              '&:hover': {
-                bgcolor: '#2563eb',
-                color: '#ffffff',
-                borderColor: '#2563eb',
-              },
             }}
           >
-            <LogOut size={16} />
-            <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.875rem' }}>
-              Logout
-            </Typography>
+            <Avatar
+              sx={{
+                width: 40,
+                height: 40,
+                bgcolor: '#fb923c',
+                color: '#ffffff',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+              }}
+            >
+              AR
+            </Avatar>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: '#ffffff',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  lineHeight: 1.2,
+                }}
+              >
+                Alex Rivera
+              </Typography>
+
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: '0.75rem',
+                }}
+              >
+                PC Manager
+              </Typography>
+            </Box>
           </Box>
-        </Box>
-      )}
+        )}
+        <IconButton
+          size="small"
+          onClick={() => { }}
+          sx={{
+            color: 'rgba(255, 255, 255, 0.7)',
+            p: 0.5,
+            '&:hover': {
+              color: '#ffffff',
+              bgcolor: 'rgba(255, 255, 255, 0.1)',
+            },
+          }}
+        >
+          <LogOut size={20} />
+        </IconButton>
+      </Box>
     </Box>
   )
 }

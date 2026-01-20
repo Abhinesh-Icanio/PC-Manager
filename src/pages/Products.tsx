@@ -1,20 +1,15 @@
 import {
   Box,
-  Typography,
-  Card,
-  CardContent,
-  TextField,
-  InputAdornment,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Chip,
+  InputAdornment,
+  TextField,
+  Typography,
 } from '@mui/material'
-import { Search, Plus } from 'lucide-react'
-import DataTable from '../app/components/DataTable'
+import { Search } from 'lucide-react'
 import { useState } from 'react'
+import AppSelect from '../app/components/AppSelect'
+import AppTable from '../app/components/AppTable'
+import Layout from '../app/components/Layout'
 
 interface Product {
   id: string
@@ -42,11 +37,12 @@ const Products = () => {
   ])
 
   const columns = [
-    { id: 'name', label: 'Name', minWidth: 200 },
+    { id: 'name', label: 'Name', minWidth: 200, align: 'left' as const },
     {
       id: 'status',
       label: 'Status',
       minWidth: 120,
+      align: 'center' as const,
       format: (value: string) => (
         <Chip
           label={value}
@@ -79,21 +75,27 @@ const Products = () => {
     }
   }
 
-  return (
-    <Box sx={{ p: 4, bgcolor: 'background.default', minHeight: '100%' }}>
-      {/* Header */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary', mb: 0.5 }}>
-          Products
-        </Typography>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          Manage products in your organization
-        </Typography>
-      </Box>
+  const statusOptions = [
+    { label: 'All Status', value: 'All' },
+    { label: 'Active', value: 'Active' },
+    { label: 'Inactive', value: 'Inactive' },
+  ]
 
-      {/* Search and Filters */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
+  return (
+    <Layout
+      header={
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary', mb: 0.5 }}>
+            Products
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Manage products in your organization
+          </Typography>
+        </Box>
+      }
+    >
+      <AppTable
+        filters={
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
             <TextField
               placeholder="Search by name..."
@@ -109,43 +111,27 @@ const Products = () => {
               }}
               sx={{ flex: 1, minWidth: 300 }}
             />
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Status</InputLabel>
-              <Select
+            <Box sx={{ minWidth: 150 }}>
+              <AppSelect
+                options={statusOptions}
                 value={statusFilter}
+                onChange={(value: string) => setStatusFilter(value)}
                 label="Status"
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <MenuItem value="All">All Status</MenuItem>
-                <MenuItem value="Active">Active</MenuItem>
-                <MenuItem value="Inactive">Inactive</MenuItem>
-              </Select>
-            </FormControl>
-          
+                placeholder="Select status..."
+                size="small"
+              />
+            </Box>
           </Box>
-        </CardContent>
-      </Card>
-
-      {/* Table */}
-      <Card>
-        <CardContent>
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
-              Products ({filteredProducts.length})
-            </Typography>
-          </Box>
-          <DataTable
-            columns={columns}
-            rows={filteredProducts}
-            selectable
-            selectedRows={selectedRows}
-            onSelectAll={handleSelectAll}
-            onSelectRow={handleSelectRow}
-            
-          />
-        </CardContent>
-      </Card>
-    </Box>
+        }
+        tableTitle={`Products (${filteredProducts.length})`}
+        columns={columns}
+        rows={filteredProducts}
+        selectable
+        selectedRows={selectedRows}
+        onSelectAll={handleSelectAll}
+        onSelectRow={handleSelectRow}
+      />
+    </Layout>
   )
 }
 

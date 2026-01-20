@@ -6,7 +6,7 @@ const KeyMetrics = () => {
   const metrics = [
     {
       title: 'Products',
-      value: '2,840',
+      value: '70',
       icon: Package,
       iconColor: '#2563eb', // Primary blue
       bgColor: 'rgba(37, 99, 235, 0.12)',
@@ -14,7 +14,7 @@ const KeyMetrics = () => {
     },
     {
       title: 'Rate Tables',
-      value: '12.5%',
+      value: '40',
       icon: Scale,
       iconColor: '#10b981', // Success green
       bgColor: 'rgba(16, 185, 129, 0.12)',
@@ -22,7 +22,7 @@ const KeyMetrics = () => {
     },
     {
       title: 'Schedules',
-      value: '428',
+      value: '28',
       icon: Calendar,
       iconColor: '#8b5cf6', // Purple
       bgColor: 'rgba(139, 92, 246, 0.12)',
@@ -30,7 +30,7 @@ const KeyMetrics = () => {
     },
     {
       title: 'Methodologies',
-      value: '99.8%',
+      value: '9',
       icon: CheckCircle2,
       iconColor: '#f59e0b', // Amber
       bgColor: 'rgba(245, 158, 11, 0.12)',

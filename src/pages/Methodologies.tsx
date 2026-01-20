@@ -1,20 +1,16 @@
 import {
   Box,
-  Typography,
-  Card,
-  CardContent,
-  TextField,
-  InputAdornment,
   Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Chip,
+  InputAdornment,
+  TextField,
+  Typography,
 } from '@mui/material'
-import { Search, Plus } from 'lucide-react'
-import DataTable from '../app/components/DataTable'
+import { Plus, Search } from 'lucide-react'
 import { useState } from 'react'
+import AppSelect from '../app/components/AppSelect'
+import AppTable from '../app/components/AppTable'
+import Layout from '../app/components/Layout'
 
 interface Methodology {
   id: string
@@ -45,17 +41,32 @@ const Methodologies = () => {
     { id: '10', name: 'Static Methodology Kappa', rateTable: 'Default Rate Table', status: 'Active', createdAt: 'Oct 01, 2025', efficiency: '91.2%' },
   ])
 
-  const rateTables = ['All', 'Standard Rate Table', 'Premium Rate Table', 'Basic Rate Table', 'Enterprise Rate Table', 'Custom Rate Table']
+  const rateTableOptions = [
+    { label: 'All', value: 'All' },
+    { label: 'Standard Rate Table', value: 'Standard Rate Table' },
+    { label: 'Premium Rate Table', value: 'Premium Rate Table' },
+    { label: 'Basic Rate Table', value: 'Basic Rate Table' },
+    { label: 'Enterprise Rate Table', value: 'Enterprise Rate Table' },
+    { label: 'Custom Rate Table', value: 'Custom Rate Table' },
+  ]
+
+  const statusOptions = [
+    { label: 'All Status', value: 'All' },
+    { label: 'Active', value: 'Active' },
+    { label: 'Inactive', value: 'Inactive' },
+    { label: 'Draft', value: 'Draft' },
+  ]
 
   const columns = [
-    { id: 'name', label: 'Name', minWidth: 250 },
-    { id: 'rateTable', label: 'Rate Table', minWidth: 200 },
-    { id: 'efficiency', label: 'Efficiency', minWidth: 120 },
-    { id: 'createdAt', label: 'Created At', minWidth: 120 },
+    { id: 'name', label: 'Name', minWidth: 250, align: 'left' as const },
+    { id: 'rateTable', label: 'Rate Table', minWidth: 200, align: 'left' as const },
+    { id: 'efficiency', label: 'Efficiency', minWidth: 120, align: 'right' as const },
+    { id: 'createdAt', label: 'Created At', minWidth: 120, align: 'left' as const },
     {
       id: 'status',
       label: 'Status',
       minWidth: 120,
+      align: 'center' as const,
       format: (value: string) => {
         const colorMap: Record<string, 'success' | 'default' | 'warning'> = {
           Active: 'success',
@@ -98,29 +109,29 @@ const Methodologies = () => {
   }
 
   return (
-    <Box sx={{ p: 4, bgcolor: 'background.default', minHeight: '100%' }}>
-      {/* Header */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary', mb: 0.5 }}>
-            Methodologies
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Manage methodologies in your organization
-          </Typography>
+    <Layout
+      header={
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary', mb: 0.5 }}>
+              Methodologies
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Manage methodologies in your organization
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            startIcon={<Plus size={18} />}
+            sx={{ textTransform: 'none' }}
+          >
+            Create Methodology
+          </Button>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Plus size={18} />}
-          sx={{ textTransform: 'none' }}
-        >
-          Create Methodology
-        </Button>
-      </Box>
-
-      {/* Search and Filters */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
+      }
+    >
+      <AppTable
+        filters={
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
             <TextField
               placeholder="Search by name or rate table..."
@@ -136,58 +147,39 @@ const Methodologies = () => {
               }}
               sx={{ flex: 1, minWidth: 300 }}
             />
-            <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel>Rate Table</InputLabel>
-              <Select
+            <Box sx={{ minWidth: 200 }}>
+              <AppSelect
+                options={rateTableOptions}
                 value={rateTableFilter}
+                onChange={(value: string) => setRateTableFilter(value)}
                 label="Rate Table"
-                onChange={(e) => setRateTableFilter(e.target.value)}
-              >
-                {rateTables.map((table) => (
-                  <MenuItem key={table} value={table}>
-                    {table}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Status</InputLabel>
-              <Select
+                placeholder="Select rate table..."
+                size="small"
+              />
+            </Box>
+            <Box sx={{ minWidth: 150 }}>
+              <AppSelect
+                options={statusOptions}
                 value={statusFilter}
+                onChange={(value: string) => setStatusFilter(value)}
                 label="Status"
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <MenuItem value="All">All Status</MenuItem>
-                <MenuItem value="Active">Active</MenuItem>
-                <MenuItem value="Inactive">Inactive</MenuItem>
-                <MenuItem value="Draft">Draft</MenuItem>
-              </Select>
-            </FormControl>
+                placeholder="Select status..."
+                size="small"
+              />
+            </Box>
           </Box>
-        </CardContent>
-      </Card>
-
-      {/* Table */}
-      <Card>
-        <CardContent>
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
-              Methodologies ({filteredMethodologies.length})
-            </Typography>
-          </Box>
-          <DataTable
-            columns={columns}
-            rows={filteredMethodologies}
-            selectable
-            selectedRows={selectedRows}
-            onSelectAll={handleSelectAll}
-            onSelectRow={handleSelectRow}
-            onEdit={(row) => console.log('Edit', row)}
-            onDelete={(row) => console.log('Delete', row)}
-          />
-        </CardContent>
-      </Card>
-    </Box>
+        }
+        tableTitle={`Methodologies (${filteredMethodologies.length})`}
+        columns={columns}
+        rows={filteredMethodologies}
+        selectable
+        selectedRows={selectedRows}
+        onSelectAll={handleSelectAll}
+        onSelectRow={handleSelectRow}
+        onEdit={(row) => console.log('Edit', row)}
+        onDelete={(row) => console.log('Delete', row)}
+      />
+    </Layout>
   )
 }
 

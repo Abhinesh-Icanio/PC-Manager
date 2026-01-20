@@ -1,54 +1,45 @@
-import { Box, Avatar, Typography, Badge, IconButton } from '@mui/material'
+import { Badge, Box, IconButton, Typography } from '@mui/material'
 import { Bell } from 'lucide-react'
-import logoImage from '../dcm-logo.png'
 
 const Header = () => {
+  const currentDate = new Date()
+  const formattedDate = currentDate.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+  const formattedTime = currentDate.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  })
+
   return (
     <Box
       sx={{
         height: 70,
-        bgcolor: 'primary.main',
+        bgcolor: '#f8fafc',
         borderBottom: '1px solid',
-        borderColor: 'primary.dark',
+        borderColor: '#e2e8f0',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'end',
         px: 4,
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        position: 'relative',
+        zIndex: 10,
       }}
     >
-      {/* Logo Section */}
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Box
-          sx={{
-            width: 150,
-            height: 'auto',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <img
-            src={logoImage}
-            alt="DCM Logo"
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-            }}
-          />
-        </Box>
-      </Box>
-      
-      {/* Right Side */}
+     
+      {/* Right Side - Icons and Date/Time */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
         {/* Notifications */}
         <IconButton
           sx={{
-            color: 'rgba(255, 255, 255, 0.8)',
+            color: '#475569',
             '&:hover': {
-              bgcolor: 'rgba(255, 255, 255, 0.1)',
-              color: '#ffffff',
+              bgcolor: '#ffffff',
+              color: '#1e293b',
             },
           }}
         >
@@ -57,28 +48,29 @@ const Header = () => {
           </Badge>
         </IconButton>
 
-        {/* User Profile */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Avatar 
-            sx={{ 
-              width: 36, 
-              height: 36, 
-              bgcolor: 'rgba(255, 255, 255, 0.2)',
-              color: '#ffffff',
-              fontSize: '0.875rem',
+
+        {/* Date and Time */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+          <Typography
+            variant="body2"
+            sx={{
               fontWeight: 600,
+              color: '#1e293b',
+              fontSize: '0.875rem',
+              lineHeight: 1.2,
             }}
           >
-            AT
-          </Avatar>
-          <Box>
-            <Typography variant="body2" sx={{ fontWeight: 600, color: '#ffffff', lineHeight: 1.2 }}>
-              A. Thompson
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.75rem' }}>
-              Admin
-            </Typography>
-          </Box>
+            {formattedDate}
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              color: '#64748b',
+              fontSize: '0.75rem',
+            }}
+          >
+            {formattedTime}
+          </Typography>
         </Box>
       </Box>
     </Box>

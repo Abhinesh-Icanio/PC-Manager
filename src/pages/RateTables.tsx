@@ -1,20 +1,17 @@
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
-  FormControl,
   InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
   TextField,
   Typography,
 } from '@mui/material'
-import { Download, Plus, Search, Upload } from 'lucide-react'
+import { Download, Edit, FileText, Plus, Search, Upload } from 'lucide-react'
 import { useState } from 'react'
-import DataTable from '../app/components/DataTable'
+import AppMenu from '../app/components/AppMenu'
+import AppSelect from '../app/components/AppSelect'
+import AppTable from '../app/components/AppTable'
+import Layout from '../app/components/Layout'
 
 interface RateTable {
   id: string
@@ -45,17 +42,31 @@ const RateTables = () => {
     { id: '10', name: 'Default Rate Table', schedule: 'Customer Portal Update', status: 'Active', createdAt: 'Oct 01, 2025', rate: '10.0%' },
   ])
 
-  const schedules = ['All', 'Q4 2024 Project Alpha Launch', 'Annual Financial Audit Prep', 'New User Onboarding Flow', 'Infrastructure Upgrade Phase 2']
+  const scheduleOptions = [
+    { label: 'All', value: 'All' },
+    { label: 'Q4 2024 Project Alpha Launch', value: 'Q4 2024 Project Alpha Launch' },
+    { label: 'Annual Financial Audit Prep', value: 'Annual Financial Audit Prep' },
+    { label: 'New User Onboarding Flow', value: 'New User Onboarding Flow' },
+    { label: 'Infrastructure Upgrade Phase 2', value: 'Infrastructure Upgrade Phase 2' },
+  ]
+
+  const statusOptions = [
+    { label: 'All Status', value: 'All' },
+    { label: 'Active', value: 'Active' },
+    { label: 'Inactive', value: 'Inactive' },
+    { label: 'Draft', value: 'Draft' },
+  ]
 
   const columns = [
-    { id: 'name', label: 'Name', minWidth: 200 },
-    { id: 'schedule', label: 'Schedule', minWidth: 250 },
-    { id: 'rate', label: 'Rate', minWidth: 100 },
-    { id: 'createdAt', label: 'Created At', minWidth: 120 },
+    { id: 'name', label: 'Name', minWidth: 200, align: 'left' as const },
+    { id: 'schedule', label: 'Schedule', minWidth: 250, align: 'left' as const },
+    { id: 'rate', label: 'Rate', minWidth: 100, align: 'right' as const },
+    { id: 'createdAt', label: 'Created At', minWidth: 120, align: 'left' as const },
     {
       id: 'status',
       label: 'Status',
       minWidth: 120,
+      align: 'center' as const,
       format: (value: string) => {
         const colorMap: Record<string, 'success' | 'default' | 'warning'> = {
           Active: 'success',
@@ -98,166 +109,181 @@ const RateTables = () => {
   }
 
   return (
-    <Box sx={{ p: 4, bgcolor: 'background.default', minHeight: '100%' }}>
-      {/* Header */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary', mb: 0.5 }}>
-            Rate Tables
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Manage rate tables in your organization
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          startIcon={<Plus size={18} />}
-          sx={{ textTransform: 'none' }}
-        >
-          Create Rate Table
-        </Button>
-      </Box>
-
-      {/* Search and Filters */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mb: 2 }}>
-            <TextField
-              placeholder="Search by name or schedule..."
-              size="small"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search size={20} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ flex: 1, minWidth: 300 }}
-            />
-            <FormControl size="small" sx={{ minWidth: 250 }}>
-              <InputLabel>Schedule</InputLabel>
-              <Select
-                value={scheduleFilter}
-                label="Schedule"
-                onChange={(e) => setScheduleFilter(e.target.value)}
-              >
-                {schedules.map((schedule) => (
-                  <MenuItem key={schedule} value={schedule}>
-                    {schedule}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl size="small" sx={{ minWidth: 150 }}>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={statusFilter}
-                label="Status"
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <MenuItem value="All">All Status</MenuItem>
-                <MenuItem value="Active">Active</MenuItem>
-                <MenuItem value="Inactive">Inactive</MenuItem>
-                <MenuItem value="Draft">Draft</MenuItem>
-              </Select>
-            </FormControl>
+    <Layout
+      header={
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary', mb: 0.5 }}>
+              Rate Tables
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              Manage rate tables in your organization
+            </Typography>
           </Box>
-
-          {/* Bulk Actions */}
-          {selectedRows.length > 0 && (
-            <Box
-              sx={{
-                p: 2,
-                bgcolor: 'primary.main',
-                borderRadius: 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-              }}
-            >
-              <Typography variant="body2" sx={{ color: 'white', fontWeight: 500 }}>
-                {selectedRows.length} rate table(s) selected
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
+          <AppMenu
+            menuItems={[
+              {
+                id: 'manual',
+                label: 'Manual Creation',
+                icon: FileText,
+                onClick: () => {
+                  console.log('Manual creation')
+                  // Add your manual creation logic here
+                },
+              },
+              {
+                id: 'bulk',
+                label: 'Bulk Upload',
+                icon: Upload,
+                onClick: () => {
+                  console.log('Bulk upload')
+                  // Add your bulk upload logic here
+                },
+              },
+            ]}
+            trigger={
+              <Button
+                variant="contained"
+                startIcon={<Plus size={18} />}
+                sx={{ textTransform: 'none' }}
+              >
+                Create Rate Table
+              </Button>
+            }
+          />
+        </Box>
+      }
+    >
+      <AppTable
+        filters={
+          <>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+              <TextField
+                placeholder="Search by name or schedule..."
+                size="small"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search size={20} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ flex: 1, minWidth: 300 }}
+              />
+              <Box sx={{ minWidth: 250 }}>
+                <AppSelect
+                  options={scheduleOptions}
+                  value={scheduleFilter}
+                  onChange={(value: string) => setScheduleFilter(value)}
+                  label="Schedule"
+                  placeholder="Select schedule..."
                   size="small"
-                  variant="outlined"
-                  startIcon={<Upload size={16} />}
-                  sx={{
-                    textTransform: 'none',
-                    borderColor: 'rgba(255, 255, 255, 0.5)',
-                    color: 'white',
-                    '&:hover': {
-                      borderColor: 'white',
-                      bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    },
-                  }}
-                >
-                  Bulk Upload
-                </Button>
-                <Button
+                />
+              </Box>
+              <Box sx={{ minWidth: 150 }}>
+                <AppSelect
+                  options={statusOptions}
+                  value={statusFilter}
+                  onChange={(value: string) => setStatusFilter(value)}
+                  label="Status"
+                  placeholder="Select status..."
                   size="small"
-                  variant="outlined"
-                  startIcon={<Download size={16} />}
-                  sx={{
-                    textTransform: 'none',
-                    borderColor: 'rgba(255, 255, 255, 0.5)',
-                    color: 'white',
-                    '&:hover': {
-                      borderColor: 'white',
-                      bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    },
-                  }}
-                >
-                  Export
-                </Button>
+                />
               </Box>
             </Box>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Table */}
-      <Card>
-        <CardContent>
-          <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
-              Rate Tables ({filteredRateTables.length})
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<Upload size={16} />}
-                sx={{ textTransform: 'none' }}
+            {/* Bulk Actions - Above Table */}
+            {selectedRows.length > 0 && (
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: 'primary.main',
+                  borderRadius: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 2,
+                  mt: 2,
+                }}
               >
-                Import XLSX
-              </Button>
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<Download size={16} />}
-                sx={{ textTransform: 'none' }}
-              >
-                Export
-              </Button>
-            </Box>
-          </Box>
-          <DataTable
-            columns={columns}
-            rows={filteredRateTables}
-            selectable
-            selectedRows={selectedRows}
-            onSelectAll={handleSelectAll}
-            onSelectRow={handleSelectRow}
-            onEdit={(row) => console.log('Edit', row)}
-            onDelete={(row) => console.log('Delete', row)}
-          />
-        </CardContent>
-      </Card>
-    </Box>
+                <Typography variant="body2" sx={{ color: 'white', fontWeight: 500 }}>
+                  {selectedRows.length} rate table(s) selected
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  {selectedRows.length > 1 && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<Edit size={16} />}
+                      onClick={() => {
+                        console.log('Edit bulk rate tables', selectedRows)
+                        // Add your bulk edit logic here
+                      }}
+                      sx={{
+                        textTransform: 'none',
+                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                        color: 'white',
+                        '&:hover': {
+                          borderColor: 'white',
+                          bgcolor: 'rgba(255, 255, 255, 0.1)',
+                        },
+                      }}
+                    >
+                      Edit Bulk Rate Tables
+                    </Button>
+                  )}
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<Download size={16} />}
+                    onClick={() => {
+                      console.log('Export selected rate tables', selectedRows)
+                      // Add your export logic here
+                    }}
+                    sx={{
+                      textTransform: 'none',
+                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                      color: 'white',
+                      '&:hover': {
+                        borderColor: 'white',
+                        bgcolor: 'rgba(255, 255, 255, 0.1)',
+                      },
+                    }}
+                  >
+                    Export Selected Rate Tables
+                  </Button>
+                </Box>
+              </Box>
+            )}
+          </>
+        }
+        tableTitle={`Rate Tables (${filteredRateTables.length})`}
+        tableActions={
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<Download size={16} />}
+            onClick={() => {
+              console.log('Export all rate tables')
+              // Add your export all logic here
+            }}
+            sx={{ textTransform: 'none' }}
+          >
+            Export All
+          </Button>
+        }
+        columns={columns}
+        rows={filteredRateTables}
+        selectable
+        selectedRows={selectedRows}
+        onSelectAll={handleSelectAll}
+        onSelectRow={handleSelectRow}
+        onEdit={(row) => console.log('Edit', row)}
+        onDelete={(row) => console.log('Delete', row)}
+      />
+    </Layout>
   )
 }
 
