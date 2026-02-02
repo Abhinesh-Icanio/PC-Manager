@@ -28,6 +28,7 @@ interface BulkUploadFormProps {
 const fieldTypes: Record<string, string> = {
     name: 'string',
     product: 'string',
+    scheduleType: 'string',
     status: 'string',
     description: 'string',
     startDate: 'date',
@@ -79,6 +80,10 @@ const valueMapper = (values: string[], headers: string[], scheduleFormFields: an
     const statusField = scheduleFormFields.find(f => f.name === 'status')
     const statusOptions = statusField?.options || []
 
+    // Get scheduleType options from scheduleFormFields
+    const scheduleTypeField = scheduleFormFields.find(f => ['scheduleType', 'schedule type'].includes(f.name))
+    const scheduleTypeOptions = scheduleTypeField?.options || []
+
     const schedule = {
         name: getFieldValue(headers, values, [
             'name',
@@ -95,6 +100,15 @@ const valueMapper = (values: string[], headers: string[], scheduleFormFields: an
             (value: any) => value || '',
             'value',
             true
+        ),
+        scheduleType: getFieldValue(
+            headers,
+            values,
+            ['schedule type', 'scheduletype', 'schedule_type', 'schedule-type', 'type'],
+            scheduleTypeOptions,
+            (value: any) => value || '',
+            'value',
+            false
         ),
         status: getFieldValue(
             headers,
@@ -148,6 +162,7 @@ const valueMapper = (values: string[], headers: string[], scheduleFormFields: an
             ],
             [],
             (value: any) => {
+                console.log('value', value)
                 if (!value) return ''
                 // Try to parse date and return as ISO string
                 const date = new Date(value)
@@ -171,12 +186,12 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({ onSave, onUploadButtonS
     const [editDrawerOpen, setEditDrawerOpen] = useState(false)
     const [isEmptyFile, setIsEmptyFile] = useState(false)
 
-    // Get required fields from constants
+    // Get required fields from constants, excluding status (status defaults to "Active" in bulk upload)
     const requiredFields = scheduleFormFields
-        .filter(field => field.required)
+        .filter(field => field.required && field.name !== 'status')
         .map(field => field.name)
 
-    const expectedFields = scheduleFormFields.map(field => field.name)
+    const expectedFields = scheduleFormFields?.filter((item) => item.name !== 'status').map(field => field.name)
 
 
 
@@ -213,13 +228,63 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({ onSave, onUploadButtonS
         }
     }, [filteredData, filteredHeaders])
 
-    // Filter data to only include fields that match scheduleFormFields using valueMapper
+    // Filter data to only include rows that have at least one matching header key
+    // Then map fields using valueMapper
     const filterDataToExpectedFields = () => {
         // Always show all expected fields
         setFilteredHeaders(expectedFields)
 
-        // Convert parsed data to array format and map using valueMapper
-        const filtered = parsedData.map(row => {
+        // First, filter parsed data to only include rows that have at least one matching header
+        const rowsWithMatchingHeaders = parsedData.filter(() => {
+            // Check if any header matches our expected fields
+            return headers.some(header => {
+                const headerLower = normalize(header)
+                return expectedFields.some(field => {
+                    // Check if header matches field name or any of its possible variations
+                    if (headerLower === normalize(field)) return true
+
+                    // Check against possible name variations for each field
+                    if (field === 'name') {
+                        const nameVariations = ['name', 'schedule name', 'schedule', 'schedule_name', 'schedule-name']
+                        return nameVariations.some(v => normalize(v) === headerLower)
+                    }
+                    // For product field
+                    if (field === 'product') {
+                        const productVariations = ['product', 'product name', 'productname', 'product_name', 'product-name']
+                        return productVariations.some(v => normalize(v) === headerLower)
+                    }
+                    // For scheduleType field
+                    if (field === 'scheduleType') {
+                        const scheduleTypeVariations = ['schedule type', 'scheduletype', 'schedule_type', 'schedule-type', 'type']
+                        return scheduleTypeVariations.some(v => normalize(v) === headerLower)
+                    }
+                    // For status field
+                    if (field === 'status') {
+                        const statusVariations = ['status', 'schedule status', 'schedulestatus', 'status_type', 'status-type']
+                        return statusVariations.some(v => normalize(v) === headerLower)
+                    }
+                    // For description field
+                    if (field === 'description') {
+                        const descVariations = ['description', 'desc', 'details', 'notes', 'comment']
+                        return descVariations.some(v => normalize(v) === headerLower)
+                    }
+                    // For startDate field
+                    if (field === 'startDate') {
+                        const startDateVariations = ['startdate', 'start date', 'start_date', 'start-date', 'begin date', 'begindate', 'from date', 'fromdate']
+                        return startDateVariations.some(v => normalize(v) === headerLower)
+                    }
+                    // For endDate field
+                    if (field === 'endDate') {
+                        const endDateVariations = ['enddate', 'end date', 'end_date', 'end-date', 'finish date', 'finishdate', 'to date', 'todate']
+                        return endDateVariations.some(v => normalize(v) === headerLower)
+                    }
+                    return false
+                })
+            })
+        })
+
+        // Convert filtered rows to array format and map using valueMapper
+        const filtered = rowsWithMatchingHeaders.map(row => {
             // Convert row object to array of values in the same order as headers
             const values = headers.map(header => row[header] || '')
 
@@ -227,6 +292,7 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({ onSave, onUploadButtonS
             const mappedSchedule = valueMapper(values, headers, scheduleFormFields)
 
             // Ensure all expected fields are present, show "-" for missing ones
+            // Note: status is excluded from expectedFields, so it won't appear in the table
             const filteredRow: any = {}
             expectedFields.forEach(fieldName => {
                 if (mappedSchedule[fieldName as keyof typeof mappedSchedule] !== undefined &&
@@ -236,6 +302,8 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({ onSave, onUploadButtonS
                     filteredRow[fieldName] = '-' // Show "-" for missing fields
                 }
             })
+            // Always set status to "Active" for bulk upload (not shown in table)
+            filteredRow.status = 'Active'
             return filteredRow
         })
 
@@ -367,16 +435,88 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({ onSave, onUploadButtonS
     }
 
     const validateHeaders = () => {
-        const fileHeadersLower = headers.map(h => h.toLowerCase().trim())
-        const expectedFieldsLower = expectedFields.map(f => f.toLowerCase().trim())
+        // Check if each expected field has a matching header (using flexible matching)
+        const missing = expectedFields.filter(field => {
+            const fieldLower = normalize(field)
+            // Check if any header matches the field name or its variations
+            return !headers.some(header => {
+                const headerLower = normalize(header)
+                // Direct match
+                if (headerLower === fieldLower) return true
 
-        const missing = expectedFields.filter((_field, index) =>
-            !fileHeadersLower.includes(expectedFieldsLower[index])
-        )
+                // Check against possible name variations for each field
+                if (field === 'name') {
+                    const nameVariations = ['name', 'schedule name', 'schedule', 'schedule_name', 'schedule-name']
+                    return nameVariations.some(v => normalize(v) === headerLower)
+                }
+                if (field === 'product') {
+                    const productVariations = ['product', 'product name', 'productname', 'product_name', 'product-name']
+                    return productVariations.some(v => normalize(v) === headerLower)
+                }
+                if (field === 'scheduleType') {
+                    const scheduleTypeVariations = ['schedule type', 'scheduletype', 'schedule_type', 'schedule-type', 'type']
+                    return scheduleTypeVariations.some(v => normalize(v) === headerLower)
+                }
+                if (field === 'status') {
+                    const statusVariations = ['status', 'schedule status', 'schedulestatus', 'status_type', 'status-type']
+                    return statusVariations.some(v => normalize(v) === headerLower)
+                }
+                if (field === 'description') {
+                    const descVariations = ['description', 'desc', 'details', 'notes', 'comment']
+                    return descVariations.some(v => normalize(v) === headerLower)
+                }
+                if (field === 'startDate') {
+                    const startDateVariations = ['start date', 'startdate', 'start_date', 'start-date', 'begin date', 'begindate', 'from date', 'fromdate']
+                    return startDateVariations.some(v => normalize(v) === headerLower)
+                }
+                if (field === 'endDate') {
+                    const endDateVariations = ['end date', 'enddate', 'end_date', 'end-date', 'finish date', 'finishdate', 'to date', 'todate']
+                    return endDateVariations.some(v => normalize(v) === headerLower)
+                }
+                return false
+            })
+        })
 
-        const extra = headers.filter(header =>
-            !expectedFieldsLower.includes(header.toLowerCase().trim())
-        )
+        // Check for extra headers (headers that don't match any expected field)
+        const extra = headers.filter(header => {
+            const headerLower = normalize(header)
+            return !expectedFields.some(field => {
+                const fieldLower = normalize(field)
+                // Direct match
+                if (headerLower === fieldLower) return true
+
+                // Check against possible name variations for each field
+                if (field === 'name') {
+                    const nameVariations = ['name', 'schedule name', 'schedule', 'schedule_name', 'schedule-name']
+                    return nameVariations.some(v => normalize(v) === headerLower)
+                }
+                if (field === 'product') {
+                    const productVariations = ['product', 'product name', 'productname', 'product_name', 'product-name']
+                    return productVariations.some(v => normalize(v) === headerLower)
+                }
+                if (field === 'scheduleType') {
+                    const scheduleTypeVariations = ['schedule type', 'scheduletype', 'schedule_type', 'schedule-type', 'type']
+                    return scheduleTypeVariations.some(v => normalize(v) === headerLower)
+                }
+                if (field === 'status') {
+                    const statusVariations = ['status', 'schedule status', 'schedulestatus', 'status_type', 'status-type']
+                    return statusVariations.some(v => normalize(v) === headerLower)
+                }
+                if (field === 'description') {
+                    const descVariations = ['description', 'desc', 'details', 'notes', 'comment']
+                    return descVariations.some(v => normalize(v) === headerLower)
+                }
+                if (field === 'startDate') {
+                    const startDateVariations = ['start date', 'startdate', 'start_date', 'start-date', 'begin date', 'begindate', 'from date', 'fromdate']
+                    return startDateVariations.some(v => normalize(v) === headerLower)
+                }
+                if (field === 'endDate') {
+                    const endDateVariations = ['end date', 'enddate', 'end_date', 'end-date', 'finish date', 'finishdate', 'to date', 'todate']
+                    return endDateVariations.some(v => normalize(v) === headerLower)
+                }
+                return false
+            })
+        })
 
         if (missing.length > 0 || extra.length > 0) {
             setHeaderErrors({ missing, extra })
@@ -435,18 +575,21 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({ onSave, onUploadButtonS
                 }
             })
 
-            // Validate status field values (only if value exists and is not "-")
-            if (row.status && row.status !== '-') {
-                const validStatuses = ['Active', 'Inactive', 'Draft']
-                if (!validStatuses.includes(String(row.status))) {
-                    const displayLabel = fieldToLabelMap['status'] || 'Status'
+            // Validate scheduleType field values (only if value exists and is not "-")
+            if (row.scheduleType && row.scheduleType !== '-') {
+                const validScheduleTypes = ['PCE', 'Vested']
+                if (!validScheduleTypes.includes(String(row.scheduleType))) {
+                    const displayLabel = fieldToLabelMap['scheduleType'] || 'Schedule Type'
                     errors.push({
                         row: index + 1,
-                        field: 'status', // Use field name as key
-                        message: `${displayLabel} must be one of: ${validStatuses.join(', ')}`,
+                        field: 'scheduleType',
+                        message: `${displayLabel} must be one of: ${validScheduleTypes.join(', ')}`,
                     })
                 }
             }
+
+            // Status is always set to "Active" in bulk upload and is not shown in the preview table
+            // No validation needed for status in bulk upload context
         })
 
         setValidationErrors(errors)
@@ -465,31 +608,72 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({ onSave, onUploadButtonS
 
     const handleSaveRow = (values: any) => {
         if (editingRowIndex !== null) {
-            const updatedData = [...filteredData]
-            updatedData[editingRowIndex] = values
-            setFilteredData(updatedData)
-
-            // Also update parsedData to maintain consistency
-            const updatedParsedData = [...parsedData]
-            // Map values back to original file headers
-            const row: any = {}
-            headers.forEach(fileHeader => {
-                const headerLower = fileHeader.toLowerCase().trim()
-                const matchingField = expectedFields.find(f =>
-                    f.toLowerCase().trim() === headerLower
-                )
-                if (matchingField && values[matchingField] !== undefined) {
-                    // Convert Date objects to strings for display
-                    let value = values[matchingField]
-                    if (value instanceof Date) {
-                        // Format date as string (you can adjust format as needed)
-                        value = value.toISOString().split('T')[0]
-                    }
-                    row[fileHeader] = value
+            // Update only the specific row in filteredData without resetting the entire array
+            setFilteredData(prevData => {
+                const updatedData = [...prevData]
+                // Update only the edited row
+                updatedData[editingRowIndex] = {
+                    ...updatedData[editingRowIndex],
+                    ...values
                 }
+                return updatedData
             })
-            updatedParsedData[editingRowIndex] = row
-            setParsedData(updatedParsedData)
+
+            // Also update parsedData to maintain consistency - update only the specific row
+            setParsedData(prevParsedData => {
+                const updatedParsedData = [...prevParsedData]
+                // Map values back to original file headers
+                const row: any = { ...updatedParsedData[editingRowIndex] } // Keep existing row data
+
+                headers.forEach(fileHeader => {
+                    const headerLower = normalize(fileHeader)
+                    const matchingField = expectedFields.find(f =>
+                        normalize(f) === headerLower
+                    )
+
+                    // Check against possible name variations
+                    if (!matchingField) {
+                        // Try to find matching field by checking variations
+                        expectedFields.forEach(field => {
+                            let matches = false
+
+                            if (field === 'name') {
+                                matches = ['name', 'schedule name', 'schedule', 'schedule_name', 'schedule-name'].some(v => normalize(v) === headerLower)
+                            } else if (field === 'product') {
+                                matches = ['product', 'product name', 'productname', 'product_name', 'product-name'].some(v => normalize(v) === headerLower)
+                            } else if (field === 'scheduleType') {
+                                matches = ['schedule type', 'scheduletype', 'schedule_type', 'schedule-type', 'type'].some(v => normalize(v) === headerLower)
+                            } else if (field === 'status') {
+                                matches = ['status', 'schedule status', 'schedulestatus', 'status_type', 'status-type'].some(v => normalize(v) === headerLower)
+                            } else if (field === 'description') {
+                                matches = ['description', 'desc', 'details', 'notes', 'comment'].some(v => normalize(v) === headerLower)
+                            } else if (field === 'startDate') {
+                                matches = ['startdate', 'start date', 'start_date', 'start-date', 'begin date', 'begindate', 'from date', 'fromdate'].some(v => normalize(v) === headerLower)
+                            } else if (field === 'endDate') {
+                                matches = ['enddate', 'end date', 'end_date', 'end-date', 'finish date', 'finishdate', 'to date', 'todate'].some(v => normalize(v) === headerLower)
+                            }
+
+                            if (matches && values[field] !== undefined) {
+                                let value = values[field]
+                                if (value instanceof Date) {
+                                    value = value.toISOString().split('T')[0]
+                                }
+                                row[fileHeader] = value
+                            }
+                        })
+                    } else if (values[matchingField] !== undefined) {
+                        // Convert Date objects to strings for display
+                        let value = values[matchingField]
+                        if (value instanceof Date) {
+                            value = value.toISOString().split('T')[0]
+                        }
+                        row[fileHeader] = value
+                    }
+                })
+
+                updatedParsedData[editingRowIndex] = row
+                return updatedParsedData
+            })
 
             setEditDrawerOpen(false)
             setEditingRowIndex(null)
@@ -497,9 +681,24 @@ const BulkUploadForm: React.FC<BulkUploadFormProps> = ({ onSave, onUploadButtonS
     }
 
     const handleDownloadTemplate = () => {
-        // Create template with headers matching scheduleFormFields
-        const templateHeaders = scheduleFormFields.map(field => field.name)
-        const templateData = [templateHeaders]
+        // Create template with headers using labels from constants, excluding status
+        // Status will default to "Active" when uploaded
+        const templateHeaders = scheduleFormFields
+            .filter(field => field.name !== 'status') // Exclude status from template
+            .map(field => {
+                // Use label from constants, capitalize properly
+                const label = field.label || field.name
+                // Capitalize first letter of each word
+                return label.split(' ').map(word =>
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                ).join(' ')
+            })
+
+        // Add sample row with empty values (user will fill)
+        const templateData = [
+            templateHeaders,
+            templateHeaders.map(() => '')
+        ]
 
         // Create workbook
         const wb = XLSX.utils.book_new()

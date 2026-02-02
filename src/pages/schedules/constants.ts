@@ -27,6 +27,17 @@ export const scheduleFormFields: FieldConfig[] = [
     },
     {
         component: 'select',
+        name: 'scheduleType',
+        label: 'Schedule Type',
+        placeholder: 'Select schedule type',
+        required: true,
+        options: [
+            { label: 'PCE', value: 'PCE' },
+            { label: 'Vested', value: 'Vested' },
+        ],
+    },
+    {
+        component: 'select',
         name: 'status',
         label: 'Status',
         placeholder: 'Select status',

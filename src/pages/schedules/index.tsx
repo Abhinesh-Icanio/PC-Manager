@@ -21,8 +21,12 @@ interface Schedule {
     id: string
     name: string
     product: string
+    scheduleType?: string
     status: 'Active' | 'Inactive' | 'Draft'
-    createdAt: string
+    createdAt?: string
+    startDate?: string
+    endDate?: string
+    description?: string
     rateTableCount?: number
     methodologiesCount?: number
 }
@@ -39,16 +43,16 @@ const Schedules = () => {
 
     // Dummy data
     const [schedules] = useState<Schedule[]>([
-        { id: '1', name: 'Q4 2024 Project Alpha Launch', product: 'Product Alpha', status: 'Active', createdAt: 'Nov 04, 2025', rateTableCount: 10, methodologiesCount: 20 },
-        { id: '2', name: 'Annual Financial Audit Prep', product: 'Product Beta', status: 'Active', createdAt: 'Nov 03, 2025', rateTableCount: 5, methodologiesCount: 12 },
-        { id: '3', name: 'New User Onboarding Flow', product: 'Product Gamma', status: 'Draft', createdAt: 'Nov 01, 2025', rateTableCount: 3, methodologiesCount: 8 },
-        { id: '4', name: 'Infrastructure Upgrade Phase 2', product: 'Product Delta', status: 'Active', createdAt: 'Oct 31, 2025', rateTableCount: 15, methodologiesCount: 25 },
-        { id: '5', name: 'HR Policy Review Cycle', product: 'Product Epsilon', status: 'Active', createdAt: 'Oct 23, 2025', rateTableCount: 8, methodologiesCount: 15 },
-        { id: '6', name: 'Marketing Campaign Q1', product: 'Product Zeta', status: 'Inactive', createdAt: 'Oct 20, 2025', rateTableCount: 6, methodologiesCount: 10 },
-        { id: '7', name: 'Security Audit Schedule', product: 'Product Eta', status: 'Active', createdAt: 'Oct 15, 2025', rateTableCount: 12, methodologiesCount: 18 },
-        { id: '8', name: 'System Maintenance Window', product: 'Product Theta', status: 'Draft', createdAt: 'Oct 10, 2025', rateTableCount: 4, methodologiesCount: 7 },
-        { id: '9', name: 'Data Migration Plan', product: 'Product Iota', status: 'Active', createdAt: 'Oct 05, 2025', rateTableCount: 9, methodologiesCount: 14 },
-        { id: '10', name: 'Customer Portal Update', product: 'Product Kappa', status: 'Active', createdAt: 'Oct 01, 2025', rateTableCount: 7, methodologiesCount: 11 },
+        { id: '1', name: 'Q4 2024 Project Alpha Launch', scheduleType: 'Vested ', product: 'Product Alpha', status: 'Active', createdAt: 'Nov 04, 2025', rateTableCount: 10, methodologiesCount: 20 },
+        { id: '2', name: 'Annual Financial Audit Prep', scheduleType: 'PCE', product: 'Product Beta', status: 'Active', createdAt: 'Nov 03, 2025', rateTableCount: 5, methodologiesCount: 12 },
+        { id: '3', name: 'New User Onboarding Flow', scheduleType: 'PCE', product: 'Product Gamma', status: 'Draft', createdAt: 'Nov 01, 2025', rateTableCount: 3, methodologiesCount: 8 },
+        { id: '4', name: 'Infrastructure Upgrade Phase 2', scheduleType: 'PCE', product: 'Product Delta', status: 'Active', createdAt: 'Oct 31, 2025', rateTableCount: 15, methodologiesCount: 25 },
+        { id: '5', name: 'HR Policy Review Cycle', scheduleType: 'Vested', product: 'Product Epsilon', status: 'Active', createdAt: 'Oct 23, 2025', rateTableCount: 8, methodologiesCount: 15 },
+        { id: '6', name: 'Marketing Campaign Q1', scheduleType: 'PCE', product: 'Product Zeta', status: 'Inactive', createdAt: 'Oct 20, 2025', rateTableCount: 6, methodologiesCount: 10 },
+        { id: '7', name: 'Security Audit Schedule', scheduleType: 'PCE', product: 'Product Eta', status: 'Active', createdAt: 'Oct 15, 2025', rateTableCount: 12, methodologiesCount: 18 },
+        { id: '8', name: 'System Maintenance Window', scheduleType: 'Vested', product: 'Product Theta', status: 'Draft', createdAt: 'Oct 10, 2025', rateTableCount: 4, methodologiesCount: 7 },
+        { id: '9', name: 'Data Migration Plan', scheduleType: 'PCE', product: 'Product Iota', status: 'Active', createdAt: 'Oct 05, 2025', rateTableCount: 9, methodologiesCount: 14 },
+        { id: '10', name: 'Customer Portal Update', scheduleType: 'Vested', product: 'Product Kappa', status: 'Active', createdAt: 'Oct 01, 2025', rateTableCount: 7, methodologiesCount: 11 },
     ])
 
     const productOptions = [
@@ -66,6 +70,7 @@ const Schedules = () => {
         { label: 'Inactive', value: 'Inactive' },
         { label: 'Draft', value: 'Draft' },
     ]
+
 
     const columns = [
         {
@@ -98,6 +103,7 @@ const Schedules = () => {
             ),
         },
         { id: 'product', label: 'Product', minWidth: 150, align: 'left' as const },
+        { id: 'scheduleType', label: 'Schedule Type', minWidth: 150, align: 'left' as const },
         { id: 'createdAt', label: 'Created At', minWidth: 120, align: 'left' as const },
         {
             id: 'status',
@@ -148,6 +154,14 @@ const Schedules = () => {
     const handleSave = (values: any) => {
         console.log('Form values:', values)
         // Add save logic here
+        // values will include scheduleType along with other fields like product, name, etc.
+        if (editingSchedule) {
+            // Update existing schedule
+            console.log('Updating schedule:', { ...editingSchedule, ...values })
+        } else {
+            // Create new schedule
+            console.log('Creating schedule:', values)
+        }
         setDrawerOpen(false)
         setEditingSchedule(null)
     }
@@ -171,18 +185,22 @@ const Schedules = () => {
                 name: item.name || `Schedule ${id}`,
                 product: item.product || 'Unknown',
                 status: item.status || 'Draft',
+                scheduleType: item.scheduleType || '',
+                startDate: item.startDate || '',
+                endDate: item.endDate || '',
+                description: item.description || '',
                 createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
                 rateTableCount: 0,
                 methodologiesCount: 0,
             }
         })
-        
+
         // Add new schedules to existing schedules
         // In a real app, you would make an API call here
         console.log('Adding schedules:', newSchedules)
         // For now, just close the drawer
         // You can update the schedules state if needed: setSchedules([...schedules, ...newSchedules])
-        
+
         setBulkUploadOpen(false)
         // Show success message
         alert(`Successfully uploaded ${newSchedules.length} schedule(s)`)
@@ -397,7 +415,11 @@ const Schedules = () => {
                     initialValues={editingSchedule ? {
                         name: editingSchedule.name,
                         product: editingSchedule.product,
+                        scheduleType: editingSchedule.scheduleType || '',
                         status: editingSchedule.status,
+                        description: editingSchedule.description || '',
+                        startDate: editingSchedule.startDate ? new Date(editingSchedule.startDate) : null,
+                        endDate: editingSchedule.endDate ? new Date(editingSchedule.endDate) : null,
                     } : undefined}
                 />
             </AppDrawer>
