@@ -8,49 +8,46 @@ import {
 } from '@mui/material'
 import { Download, Edit, FileText, Plus, Search, Upload } from 'lucide-react'
 import { useState } from 'react'
-import AppMenu from '../app/components/AppMenu'
-import AppSelect from '../app/components/AppSelect'
-import AppChip from '../app/components/AppChip'
-import AppTable from '../app/components/AppTable'
-import Layout from '../app/components/Layout'
+import AppMenu from '../../appComponents/AppMenu'
+import AppSelect from '../../appComponents/AppSelect'
+import AppTable from '../../appComponents/AppTable'
+import Layout from '../../appComponents/Layout'
 
-interface Schedule {
+interface RateTable {
   id: string
   name: string
-  product: string
+  schedule: string
   status: 'Active' | 'Inactive' | 'Draft'
   createdAt: string
-  rateTableCount?: number
-  methodologiesCount?: number
+  rate: string
 }
 
-const Schedules = () => {
+const RateTables = () => {
   const [searchTerm, setSearchTerm] = useState('')
-  const [productFilter, setProductFilter] = useState('All')
+  const [scheduleFilter, setScheduleFilter] = useState('All')
   const [statusFilter, setStatusFilter] = useState('All')
-  const [selectedRows, setSelectedRows] = useState<Schedule[]>([])
+  const [selectedRows, setSelectedRows] = useState<RateTable[]>([])
 
   // Dummy data
-  const [schedules] = useState<Schedule[]>([
-    { id: '1', name: 'Q4 2024 Project Alpha Launch', product: 'Product Alpha', status: 'Active', createdAt: 'Nov 04, 2025', rateTableCount: 10, methodologiesCount: 20 },
-    { id: '2', name: 'Annual Financial Audit Prep', product: 'Product Beta', status: 'Active', createdAt: 'Nov 03, 2025', rateTableCount: 5, methodologiesCount: 12 },
-    { id: '3', name: 'New User Onboarding Flow', product: 'Product Gamma', status: 'Draft', createdAt: 'Nov 01, 2025', rateTableCount: 3, methodologiesCount: 8 },
-    { id: '4', name: 'Infrastructure Upgrade Phase 2', product: 'Product Delta', status: 'Active', createdAt: 'Oct 31, 2025', rateTableCount: 15, methodologiesCount: 25 },
-    { id: '5', name: 'HR Policy Review Cycle', product: 'Product Epsilon', status: 'Active', createdAt: 'Oct 23, 2025', rateTableCount: 8, methodologiesCount: 15 },
-    { id: '6', name: 'Marketing Campaign Q1', product: 'Product Zeta', status: 'Inactive', createdAt: 'Oct 20, 2025', rateTableCount: 6, methodologiesCount: 10 },
-    { id: '7', name: 'Security Audit Schedule', product: 'Product Eta', status: 'Active', createdAt: 'Oct 15, 2025', rateTableCount: 12, methodologiesCount: 18 },
-    { id: '8', name: 'System Maintenance Window', product: 'Product Theta', status: 'Draft', createdAt: 'Oct 10, 2025', rateTableCount: 4, methodologiesCount: 7 },
-    { id: '9', name: 'Data Migration Plan', product: 'Product Iota', status: 'Active', createdAt: 'Oct 05, 2025', rateTableCount: 9, methodologiesCount: 14 },
-    { id: '10', name: 'Customer Portal Update', product: 'Product Kappa', status: 'Active', createdAt: 'Oct 01, 2025', rateTableCount: 7, methodologiesCount: 11 },
+  const [rateTables] = useState<RateTable[]>([
+    { id: '1', name: 'Standard Rate Table', schedule: 'Q4 2024 Project Alpha Launch', status: 'Active', createdAt: 'Nov 04, 2025', rate: '12.5%' },
+    { id: '2', name: 'Premium Rate Table', schedule: 'Annual Financial Audit Prep', status: 'Active', createdAt: 'Nov 03, 2025', rate: '15.2%' },
+    { id: '3', name: 'Basic Rate Table', schedule: 'New User Onboarding Flow', status: 'Draft', createdAt: 'Nov 01, 2025', rate: '8.5%' },
+    { id: '4', name: 'Enterprise Rate Table', schedule: 'Infrastructure Upgrade Phase 2', status: 'Active', createdAt: 'Oct 31, 2025', rate: '18.9%' },
+    { id: '5', name: 'Custom Rate Table', schedule: 'HR Policy Review Cycle', status: 'Active', createdAt: 'Oct 23, 2025', rate: '10.3%' },
+    { id: '6', name: 'Tier 1 Rate Table', schedule: 'Marketing Campaign Q1', status: 'Inactive', createdAt: 'Oct 20, 2025', rate: '9.8%' },
+    { id: '7', name: 'Tier 2 Rate Table', schedule: 'Security Audit Schedule', status: 'Active', createdAt: 'Oct 15, 2025', rate: '11.2%' },
+    { id: '8', name: 'Tier 3 Rate Table', schedule: 'System Maintenance Window', status: 'Draft', createdAt: 'Oct 10, 2025', rate: '7.5%' },
+    { id: '9', name: 'Special Rate Table', schedule: 'Data Migration Plan', status: 'Active', createdAt: 'Oct 05, 2025', rate: '13.7%' },
+    { id: '10', name: 'Default Rate Table', schedule: 'Customer Portal Update', status: 'Active', createdAt: 'Oct 01, 2025', rate: '10.0%' },
   ])
 
-  const productOptions = [
+  const scheduleOptions = [
     { label: 'All', value: 'All' },
-    { label: 'Product Alpha', value: 'Product Alpha' },
-    { label: 'Product Beta', value: 'Product Beta' },
-    { label: 'Product Gamma', value: 'Product Gamma' },
-    { label: 'Product Delta', value: 'Product Delta' },
-    { label: 'Product Epsilon', value: 'Product Epsilon' },
+    { label: 'Q4 2024 Project Alpha Launch', value: 'Q4 2024 Project Alpha Launch' },
+    { label: 'Annual Financial Audit Prep', value: 'Annual Financial Audit Prep' },
+    { label: 'New User Onboarding Flow', value: 'New User Onboarding Flow' },
+    { label: 'Infrastructure Upgrade Phase 2', value: 'Infrastructure Upgrade Phase 2' },
   ]
 
   const statusOptions = [
@@ -61,36 +58,9 @@ const Schedules = () => {
   ]
 
   const columns = [
-    {
-      id: 'name',
-      label: 'Name',
-      minWidth: 250,
-      align: 'left' as const,
-      renderItem: (row: Schedule) => (
-        <Box>
-          <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
-            {row.name}
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-            {row.rateTableCount !== undefined && (
-              <AppChip
-                type="rateTable"
-                label={`Rate Table - ${row.rateTableCount}`}
-                size="small"
-              />
-            )}
-            {row.methodologiesCount !== undefined && (
-              <AppChip
-                type="methodology"
-                label={`Methodologies - ${row.methodologiesCount}`}
-                size="small"
-              />
-            )}
-          </Box>
-        </Box>
-      ),
-    },
-    { id: 'product', label: 'Product', minWidth: 150, align: 'left' as const },
+    { id: 'name', label: 'Name', minWidth: 200, align: 'left' as const },
+    { id: 'schedule', label: 'Schedule', minWidth: 250, align: 'left' as const },
+    { id: 'rate', label: 'Rate', minWidth: 100, align: 'right' as const },
     { id: 'createdAt', label: 'Created At', minWidth: 120, align: 'left' as const },
     {
       id: 'status',
@@ -114,23 +84,23 @@ const Schedules = () => {
     },
   ]
 
-  const filteredSchedules = schedules.filter((schedule) => {
-    const matchesSearch = schedule.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      schedule.product.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesProduct = productFilter === 'All' || schedule.product === productFilter
-    const matchesStatus = statusFilter === 'All' || schedule.status === statusFilter
-    return matchesSearch && matchesProduct && matchesStatus
+  const filteredRateTables = rateTables.filter((table) => {
+    const matchesSearch = table.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      table.schedule.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSchedule = scheduleFilter === 'All' || table.schedule === scheduleFilter
+    const matchesStatus = statusFilter === 'All' || table.status === statusFilter
+    return matchesSearch && matchesSchedule && matchesStatus
   })
 
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
-      setSelectedRows(filteredSchedules)
+      setSelectedRows(filteredRateTables)
     } else {
       setSelectedRows([])
     }
   }
 
-  const handleSelectRow = (row: Schedule, selected: boolean) => {
+  const handleSelectRow = (row: RateTable, selected: boolean) => {
     if (selected) {
       setSelectedRows([...selectedRows, row])
     } else {
@@ -144,10 +114,10 @@ const Schedules = () => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>
             <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary', mb: 0.5 }}>
-              Schedules
+              Rate Tables
             </Typography>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Manage schedules in your organization
+              Manage rate tables in your organization
             </Typography>
           </Box>
           <AppMenu
@@ -158,7 +128,6 @@ const Schedules = () => {
                 icon: FileText,
                 onClick: () => {
                   console.log('Manual creation')
-                  // Add your manual creation logic here
                 },
               },
               {
@@ -167,7 +136,6 @@ const Schedules = () => {
                 icon: Upload,
                 onClick: () => {
                   console.log('Bulk upload')
-                  // Add your bulk upload logic here
                 },
               },
             ]}
@@ -177,7 +145,7 @@ const Schedules = () => {
                 startIcon={<Plus size={18} />}
                 sx={{ textTransform: 'none' }}
               >
-                Create Schedule
+                Create Rate Table
               </Button>
             }
           />
@@ -189,7 +157,7 @@ const Schedules = () => {
           <>
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
               <TextField
-                placeholder="Search by name or product..."
+                placeholder="Search by name or schedule..."
                 size="small"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -202,13 +170,13 @@ const Schedules = () => {
                 }}
                 sx={{ flex: 1, minWidth: 300 }}
               />
-              <Box sx={{ minWidth: 180 }}>
+              <Box sx={{ minWidth: 250 }}>
                 <AppSelect
-                  options={productOptions}
-                  value={productFilter}
-                  onChange={(value: string) => setProductFilter(value)}
-                  label="Product"
-                  placeholder="Select product..."
+                  options={scheduleOptions}
+                  value={scheduleFilter}
+                  onChange={(value: string) => setScheduleFilter(value)}
+                  label="Schedule"
+                  placeholder="Select schedule..."
                   size="small"
                 />
               </Box>
@@ -224,7 +192,6 @@ const Schedules = () => {
               </Box>
             </Box>
 
-            {/* Bulk Actions - Above Table */}
             {selectedRows.length > 0 && (
               <Box
                 sx={{
@@ -239,7 +206,7 @@ const Schedules = () => {
                 }}
               >
                 <Typography variant="body2" sx={{ color: 'white', fontWeight: 500 }}>
-                  {selectedRows.length} schedule(s) selected
+                  {selectedRows.length} rate table(s) selected
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   {selectedRows.length > 1 && (
@@ -248,8 +215,7 @@ const Schedules = () => {
                       variant="outlined"
                       startIcon={<Edit size={16} />}
                       onClick={() => {
-                        console.log('Edit bulk schedules', selectedRows)
-                        // Add your bulk edit logic here
+                        console.log('Edit bulk rate tables', selectedRows)
                       }}
                       sx={{
                         textTransform: 'none',
@@ -261,7 +227,7 @@ const Schedules = () => {
                         },
                       }}
                     >
-                      Edit Bulk Schedules
+                      Edit Bulk Rate Tables
                     </Button>
                   )}
                   <Button
@@ -269,8 +235,7 @@ const Schedules = () => {
                     variant="outlined"
                     startIcon={<Download size={16} />}
                     onClick={() => {
-                      console.log('Export selected schedules', selectedRows)
-                      // Add your export logic here
+                      console.log('Export selected rate tables', selectedRows)
                     }}
                     sx={{
                       textTransform: 'none',
@@ -282,22 +247,21 @@ const Schedules = () => {
                       },
                     }}
                   >
-                    Export Selected Schedules
+                    Export Selected Rate Tables
                   </Button>
                 </Box>
               </Box>
             )}
           </>
         }
-        tableTitle={`Schedules (${filteredSchedules.length})`}
+        tableTitle={`Rate Tables (${filteredRateTables.length})`}
         tableActions={
           <Button
             variant="outlined"
             size="small"
             startIcon={<Download size={16} />}
             onClick={() => {
-              console.log('Export all schedules')
-              // Add your export all logic here
+              console.log('Export all rate tables')
             }}
             sx={{ textTransform: 'none' }}
           >
@@ -305,7 +269,7 @@ const Schedules = () => {
           </Button>
         }
         columns={columns}
-        rows={filteredSchedules}
+        rows={filteredRateTables}
         selectable
         selectedRows={selectedRows}
         onSelectAll={handleSelectAll}
@@ -317,4 +281,4 @@ const Schedules = () => {
   )
 }
 
-export default Schedules
+export default RateTables

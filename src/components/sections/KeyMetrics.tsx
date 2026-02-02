@@ -1,6 +1,6 @@
 import { Box, Grid } from '@mui/material'
 import { Calendar, CheckCircle2, Package, Scale } from 'lucide-react'
-import MetricCard from '../../app/components/MetricCard'
+import MetricCard from '../../appComponents/MetricCard'
 
 const KeyMetrics = () => {
   const metrics = [

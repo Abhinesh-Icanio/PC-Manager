@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material'
 import { Filter, Download, History, Plus } from 'lucide-react'
-import ActionButton from '../../app/components/ActionButton'
-import PrimaryButton from '../../app/components/PrimaryButton'
+import ActionButton from '../../appComponents/ActionButton'
+import PrimaryButton from '../../appComponents/PrimaryButton'
 
 const QuickActions = () => {
   const actions = [

@@ -1,9 +1,9 @@
 import MainLayout from './MainLayout'
 import Dashboard from '../components/Dashboard'
-import Products from '../pages/Products'
-import RateTables from '../pages/RateTables'
-import Schedules from '../pages/Schedules'
-import Methodologies from '../pages/Methodologies'
+import Products from '../pages/products'
+import RateTables from '../pages/rate-tables'
+import Schedules from '../pages/schedules'
+import Methodologies from '../pages/methodologies'
 
 const MainRoutes = {
   element: <MainLayout />,

@@ -148,7 +148,7 @@ const DataTable = ({
                   {columns.map((column) => {
                     const value = row[column.id]
                     return (
-                      <TableCell key={column.id} align={column.align || 'left'}>
+                      <TableCell key={column.id} align={column.align || 'center'}>
                         {column.renderItem
                           ? column.renderItem(row)
                           : column.format

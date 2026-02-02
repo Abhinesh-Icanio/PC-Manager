@@ -8,9 +8,9 @@ import {
 } from '@mui/material'
 import { Plus, Search } from 'lucide-react'
 import { useState } from 'react'
-import AppSelect from '../app/components/AppSelect'
-import AppTable from '../app/components/AppTable'
-import Layout from '../app/components/Layout'
+import AppSelect from '../../appComponents/AppSelect'
+import AppTable from '../../appComponents/AppTable'
+import Layout from '../../appComponents/Layout'
 
 interface Methodology {
   id: string

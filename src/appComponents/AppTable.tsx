@@ -4,7 +4,7 @@ import DataTable from './DataTable'
 
 interface AppTableProps {
     filters?: React.ReactNode
-    tableTitle?: string
+    tableTitle?: string | React.ReactNode
     tableActions?: React.ReactNode
     columns: any[]
     rows: any[]
@@ -54,11 +54,11 @@ const AppTable: React.FC<AppTableProps> = ({
                                 alignItems: 'center',
                             }}
                         >
-                            {tableTitle && (
+                            {tableTitle && typeof tableTitle === 'string' ? (
                                 <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
                                     {tableTitle}
                                 </Typography>
-                            )}
+                            ) : tableTitle}
                             {tableActions && <Box>{tableActions}</Box>}
                         </Box>
                     )}
