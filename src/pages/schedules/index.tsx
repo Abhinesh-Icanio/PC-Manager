@@ -7,14 +7,14 @@ import {
     Typography,
 } from '@mui/material'
 import { Download, Edit, FileText, Plus, Search, Upload } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import AppMenu from '../../appComponents/AppMenu'
 import AppSelect from '../../appComponents/AppSelect'
 import AppChip from '../../appComponents/AppChip'
 import AppTable from '../../appComponents/AppTable'
 import Layout from '../../appComponents/Layout'
 import AppDrawer from '../../appComponents/AppDrawer'
-import ScheduleForm from './ScheduleForm'
+import ScheduleForm, { ScheduleFormRef } from './ScheduleForm'
 import BulkUploadForm from './BulkUploadForm'
 
 interface Schedule {
@@ -29,6 +29,7 @@ interface Schedule {
     description?: string
     rateTableCount?: number
     methodologiesCount?: number
+    version?: string
 }
 
 const Schedules = () => {
@@ -40,19 +41,20 @@ const Schedules = () => {
     const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null)
     const [bulkUploadOpen, setBulkUploadOpen] = useState(false)
     const [bulkUploadButtonDisabled, setBulkUploadButtonDisabled] = useState(true)
+    const formRef = useRef<ScheduleFormRef>(null)
 
     // Dummy data
-    const [schedules] = useState<Schedule[]>([
-        { id: '1', name: 'Q4 2024 Project Alpha Launch', scheduleType: 'Vested ', product: 'Product Alpha', status: 'Active', createdAt: 'Nov 04, 2025', rateTableCount: 10, methodologiesCount: 20 },
-        { id: '2', name: 'Annual Financial Audit Prep', scheduleType: 'PCE', product: 'Product Beta', status: 'Active', createdAt: 'Nov 03, 2025', rateTableCount: 5, methodologiesCount: 12 },
-        { id: '3', name: 'New User Onboarding Flow', scheduleType: 'PCE', product: 'Product Gamma', status: 'Draft', createdAt: 'Nov 01, 2025', rateTableCount: 3, methodologiesCount: 8 },
-        { id: '4', name: 'Infrastructure Upgrade Phase 2', scheduleType: 'PCE', product: 'Product Delta', status: 'Active', createdAt: 'Oct 31, 2025', rateTableCount: 15, methodologiesCount: 25 },
-        { id: '5', name: 'HR Policy Review Cycle', scheduleType: 'Vested', product: 'Product Epsilon', status: 'Active', createdAt: 'Oct 23, 2025', rateTableCount: 8, methodologiesCount: 15 },
-        { id: '6', name: 'Marketing Campaign Q1', scheduleType: 'PCE', product: 'Product Zeta', status: 'Inactive', createdAt: 'Oct 20, 2025', rateTableCount: 6, methodologiesCount: 10 },
-        { id: '7', name: 'Security Audit Schedule', scheduleType: 'PCE', product: 'Product Eta', status: 'Active', createdAt: 'Oct 15, 2025', rateTableCount: 12, methodologiesCount: 18 },
-        { id: '8', name: 'System Maintenance Window', scheduleType: 'Vested', product: 'Product Theta', status: 'Draft', createdAt: 'Oct 10, 2025', rateTableCount: 4, methodologiesCount: 7 },
-        { id: '9', name: 'Data Migration Plan', scheduleType: 'PCE', product: 'Product Iota', status: 'Active', createdAt: 'Oct 05, 2025', rateTableCount: 9, methodologiesCount: 14 },
-        { id: '10', name: 'Customer Portal Update', scheduleType: 'Vested', product: 'Product Kappa', status: 'Active', createdAt: 'Oct 01, 2025', rateTableCount: 7, methodologiesCount: 11 },
+    const [schedules, setSchedules] = useState<Schedule[]>([
+        { id: '1', name: 'Q4 2024 Project Alpha Launch', scheduleType: 'Vested', product: 'Product Alpha', status: 'Active', createdAt: 'Nov 04, 2025', rateTableCount: 10, methodologiesCount: 20, version: '1.00' },
+        { id: '2', name: 'Annual Financial Audit Prep', scheduleType: 'PCE', product: 'Product Beta', status: 'Active', createdAt: 'Nov 03, 2025', rateTableCount: 5, methodologiesCount: 12, version: '1.00' },
+        { id: '3', name: 'New User Onboarding Flow', scheduleType: 'PCE', product: 'Product Gamma', status: 'Draft', createdAt: 'Nov 01, 2025', rateTableCount: 3, methodologiesCount: 8, version: '1.00' },
+        { id: '4', name: 'Infrastructure Upgrade Phase 2', scheduleType: 'PCE', product: 'Product Delta', status: 'Active', createdAt: 'Oct 31, 2025', rateTableCount: 15, methodologiesCount: 25, version: '1.00' },
+        { id: '5', name: 'HR Policy Review Cycle', scheduleType: 'Vested', product: 'Product Epsilon', status: 'Active', createdAt: 'Oct 23, 2025', rateTableCount: 8, methodologiesCount: 15, version: '1.00' },
+        { id: '6', name: 'Marketing Campaign Q1', scheduleType: 'PCE', product: 'Product Zeta', status: 'Inactive', createdAt: 'Oct 20, 2025', rateTableCount: 6, methodologiesCount: 10, version: '1.00' },
+        { id: '7', name: 'Security Audit Schedule', scheduleType: 'PCE', product: 'Product Eta', status: 'Active', createdAt: 'Oct 15, 2025', rateTableCount: 12, methodologiesCount: 18, version: '1.00' },
+        { id: '8', name: 'System Maintenance Window', scheduleType: 'Vested', product: 'Product Theta', status: 'Draft', createdAt: 'Oct 10, 2025', rateTableCount: 4, methodologiesCount: 7, version: '1.00' },
+        { id: '9', name: 'Data Migration Plan', scheduleType: 'PCE', product: 'Product Iota', status: 'Active', createdAt: 'Oct 05, 2025', rateTableCount: 9, methodologiesCount: 14, version: '1.00' },
+        { id: '10', name: 'Customer Portal Update', scheduleType: 'Vested', product: 'Product Kappa', status: 'Active', createdAt: 'Oct 01, 2025', rateTableCount: 7, methodologiesCount: 11, version: '1.00' },
     ])
 
     const productOptions = [
@@ -104,6 +106,13 @@ const Schedules = () => {
         },
         { id: 'product', label: 'Product', minWidth: 150, align: 'left' as const },
         { id: 'scheduleType', label: 'Schedule Type', minWidth: 150, align: 'left' as const },
+        {
+            id: 'version',
+            label: 'Version',
+            minWidth: 100,
+            align: 'center' as const,
+            format: (value: string) => value || '1.00',
+        },
         { id: 'createdAt', label: 'Created At', minWidth: 120, align: 'left' as const },
         {
             id: 'status',
@@ -127,13 +136,27 @@ const Schedules = () => {
         },
     ]
 
-    const filteredSchedules = schedules.filter((schedule) => {
-        const matchesSearch = schedule.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            schedule.product.toLowerCase().includes(searchTerm.toLowerCase())
-        const matchesProduct = productFilter === 'All' || schedule.product === productFilter
-        const matchesStatus = statusFilter === 'All' || schedule.status === statusFilter
-        return matchesSearch && matchesProduct && matchesStatus
-    })
+    const filteredSchedules = schedules
+        .filter((schedule) => {
+            const matchesSearch = schedule.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                schedule.product.toLowerCase().includes(searchTerm.toLowerCase())
+            const matchesProduct = productFilter === 'All' || schedule.product === productFilter
+            const matchesStatus = statusFilter === 'All' || schedule.status === statusFilter
+            return matchesSearch && matchesProduct && matchesStatus
+        })
+        .sort((a, b) => {
+            // Sort by createdAt date (newest first)
+            if (!a.createdAt && !b.createdAt) return 0
+            if (!a.createdAt) return 1
+            if (!b.createdAt) return -1
+
+            // Parse dates from format "Nov 04, 2025"
+            const dateA = new Date(a.createdAt)
+            const dateB = new Date(b.createdAt)
+
+            // Sort descending (newest first)
+            return dateB.getTime() - dateA.getTime()
+        })
 
     const handleSelectAll = (selected: boolean) => {
         if (selected) {
@@ -157,13 +180,62 @@ const Schedules = () => {
         // values will include scheduleType along with other fields like product, name, etc.
         if (editingSchedule) {
             // Update existing schedule
+            const updatedSchedules = schedules.map(s =>
+                s.id === editingSchedule.id
+                    ? { ...s, ...values, version: s.version || '1.00' }
+                    : s
+            )
+            setSchedules(updatedSchedules)
             console.log('Updating schedule:', { ...editingSchedule, ...values })
         } else {
             // Create new schedule
-            console.log('Creating schedule:', values)
+            const newSchedule: Schedule = {
+                id: String(schedules.length + 1),
+                ...values,
+                version: '1.00',
+                createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+                rateTableCount: 0,
+                methodologiesCount: 0,
+            }
+            setSchedules([...schedules, newSchedule])
+            console.log('Creating schedule:', newSchedule)
         }
+        // Close drawer and reset editing state
         setDrawerOpen(false)
         setEditingSchedule(null)
+    }
+
+    const handleDuplicate = (row: Schedule) => {
+        // Get current version and increment it
+        const currentVersion = parseFloat(row.version || '1.00')
+        const newVersion = (currentVersion + 1).toFixed(2)
+
+        // Create duplicate with incremented version
+        const duplicatedSchedule: Schedule = {
+            ...row,
+            id: String(schedules.length + 1),
+            version: newVersion,
+            name: `${row.name} (v${newVersion})`,
+            status: 'Draft' as const,
+            createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+        }
+
+        setSchedules([...schedules, duplicatedSchedule])
+        console.log('Duplicated schedule:', duplicatedSchedule)
+    }
+
+    const handleDelete = (row: Schedule) => {
+        // Confirm deletion
+        if (window.confirm(`Are you sure you want to delete "${row.name}"? This action cannot be undone.`)) {
+            // Remove the schedule from the list
+            const updatedSchedules = schedules.filter(s => s.id !== row.id)
+            setSchedules(updatedSchedules)
+
+            // Also remove from selected rows if it was selected
+            setSelectedRows(selectedRows.filter(r => r.id !== row.id))
+
+            console.log('Deleted schedule:', row)
+        }
     }
 
     const handleEdit = (row: Schedule) => {
@@ -378,7 +450,8 @@ const Schedules = () => {
                     onSelectAll={handleSelectAll}
                     onSelectRow={handleSelectRow}
                     onEdit={handleEdit}
-                    onDelete={(row) => console.log('Delete', row)}
+                    onDelete={handleDelete}
+                    onDuplicate={handleDuplicate}
                 />
             </Layout>
 
@@ -400,25 +473,28 @@ const Schedules = () => {
                         <Button
                             variant="contained"
                             sx={{ textTransform: 'none' }}
-                            type="submit"
-                            form="schedule-form"
+                            onClick={() => {
+                                formRef.current?.submitForm()
+                            }}
                         >
-                            Save
+                            {editingSchedule ? 'Update' : 'Save'}
                         </Button>
                     </Box>
                 }
             >
                 <ScheduleForm
+                    ref={formRef}
                     onSave={handleSave}
                     onCancel={handleCloseDrawer}
                     initialValues={editingSchedule ? {
                         name: editingSchedule.name,
                         product: editingSchedule.product,
-                        scheduleType: editingSchedule.scheduleType || '',
+                        scheduleType: editingSchedule.scheduleType ? editingSchedule.scheduleType.trim() : '',
                         status: editingSchedule.status,
                         description: editingSchedule.description || '',
                         startDate: editingSchedule.startDate ? new Date(editingSchedule.startDate) : null,
                         endDate: editingSchedule.endDate ? new Date(editingSchedule.endDate) : null,
+                        version: editingSchedule.version || '1.00',
                     } : undefined}
                 />
             </AppDrawer>

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect, useImperativeHandle, forwardRef, useMemo } from 'react'
 import { Box } from '@mui/material'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
@@ -11,7 +11,11 @@ interface ScheduleFormProps {
     initialValues?: any
 }
 
-const ScheduleForm: React.FC<ScheduleFormProps> = ({ onSave, initialValues }) => {
+export interface ScheduleFormRef {
+    submitForm: () => void
+}
+
+const ScheduleForm = forwardRef<ScheduleFormRef, ScheduleFormProps>(({ onSave, initialValues }, ref) => {
     // Create validation schema from fields using Yup
     const validationSchema = Yup.object().shape(
         scheduleFormFields.reduce((acc, field) => {
@@ -50,27 +54,36 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ onSave, initialValues }) =>
         }, {} as Record<string, any>)
     )
 
-    const defaultValues = scheduleFormFields.reduce((acc, field) => {
-        if (field.component === 'datePicker' || field.component === 'date') {
-            acc[field.name] = field.defaultValue || null
-        } else {
-            acc[field.name] = field.defaultValue || (field.component === 'select' ? '' : '')
-        }
-        return acc
-    }, {} as Record<string, any>)
-
-    // Convert date strings to Date objects for datePicker fields
-    const processedInitialValues = initialValues ? { ...initialValues } : {}
-    scheduleFormFields.forEach((field) => {
-        if ((field.component === 'datePicker' || field.component === 'date') && processedInitialValues[field.name]) {
-            const dateValue = processedInitialValues[field.name]
-            if (typeof dateValue === 'string') {
-                processedInitialValues[field.name] = new Date(dateValue)
+    const defaultValues = useMemo(() => {
+        return scheduleFormFields.reduce((acc, field) => {
+            if (field.component === 'datePicker' || field.component === 'date') {
+                acc[field.name] = field.defaultValue || null
+            } else {
+                acc[field.name] = field.defaultValue || (field.component === 'select' ? '' : '')
             }
-        }
-    })
+            return acc
+        }, {} as Record<string, any>)
+    }, [])
 
-    const formValues = { ...defaultValues, ...processedInitialValues }
+    // Convert date strings to Date objects for datePicker fields and trim string values
+    const formValues = useMemo(() => {
+        const processedInitialValues = initialValues ? { ...initialValues } : {}
+        scheduleFormFields.forEach((field) => {
+            if ((field.component === 'datePicker' || field.component === 'date') && processedInitialValues[field.name]) {
+                const dateValue = processedInitialValues[field.name]
+                if (typeof dateValue === 'string') {
+                    processedInitialValues[field.name] = new Date(dateValue)
+                }
+            } else if ((field.component === 'select' || field.component === 'dropDown') && processedInitialValues[field.name]) {
+                // Trim select values to ensure proper matching with options
+                const selectValue = processedInitialValues[field.name]
+                if (typeof selectValue === 'string') {
+                    processedInitialValues[field.name] = selectValue.trim()
+                }
+            }
+        })
+        return { ...defaultValues, ...processedInitialValues }
+    }, [initialValues, defaultValues])
 
     const formik = useFormik({
         initialValues: formValues,
@@ -81,10 +94,16 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ onSave, initialValues }) =>
         },
     })
 
+    // Expose submit function to parent component
+    useImperativeHandle(ref, () => ({
+        submitForm: () => {
+            formik.handleSubmit()
+        },
+    }))
+
     // Handle form submission from external button
     useEffect(() => {
-        const formId = initialValues ? 'edit-row-form' : 'schedule-form'
-        const form = document.getElementById(formId) as HTMLFormElement
+        const form = document.getElementById('schedule-form') as HTMLFormElement
         if (form) {
             const handleSubmit = (e: Event) => {
                 e.preventDefault()
@@ -95,31 +114,35 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ onSave, initialValues }) =>
                 form.removeEventListener('submit', handleSubmit)
             }
         }
-    }, [formik, initialValues])
+    }, [formik])
 
-    const formId = initialValues ? 'edit-row-form' : 'schedule-form'
+    const formId = 'schedule-form'
 
     return (
         <form id={formId} onSubmit={formik.handleSubmit}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                {scheduleFormFields.map((field: FieldConfig) => (
-                    <DynamicAppComponents
-                        key={field.name}
-                        field={field}
-                        value={formik.values[field.name]}
-                        onChange={(name, value) => {
-                            formik.setFieldValue(name, value)
-                        }}
-                        onBlur={(name) => {
-                            formik.setFieldTouched(name, true)
-                        }}
-                        error={formik.errors[field.name] as string}
-                        touched={!!formik.touched[field.name]}
-                    />
-                ))}
+                {scheduleFormFields
+                    .filter((field: FieldConfig) => field.className !== 'hidden') // Hide version field
+                    .map((field: FieldConfig) => (
+                        <DynamicAppComponents
+                            key={field.name}
+                            field={field}
+                            value={formik.values[field.name]}
+                            onChange={(name, value) => {
+                                formik.setFieldValue(name, value)
+                            }}
+                            onBlur={(name) => {
+                                formik.setFieldTouched(name, true)
+                            }}
+                            error={formik.errors[field.name] as string}
+                            touched={!!formik.touched[field.name]}
+                        />
+                    ))}
             </Box>
         </form>
     )
-}
+})
+
+ScheduleForm.displayName = 'ScheduleForm'
 
 export default ScheduleForm

@@ -15,6 +15,7 @@ interface AppTableProps {
     onEdit?: (row: any) => void
     onDelete?: (row: any) => void
     onView?: (row: any) => void
+    onDuplicate?: (row: any) => void
     onRowClick?: (row: any) => void
 }
 
@@ -31,6 +32,7 @@ const AppTable: React.FC<AppTableProps> = ({
     onEdit,
     onDelete,
     onView,
+    onDuplicate,
     onRowClick,
 }) => {
     return (
@@ -72,6 +74,7 @@ const AppTable: React.FC<AppTableProps> = ({
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onView={onView}
+                        onDuplicate={onDuplicate}
                         onRowClick={onRowClick}
                     />
                 </CardContent>

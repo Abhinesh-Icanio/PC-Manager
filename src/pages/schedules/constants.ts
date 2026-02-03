@@ -64,7 +64,7 @@ export const scheduleFormFields: FieldConfig[] = [
         name: 'startDate',
         label: 'Start Date',
         placeholder: 'DD/MM/YYYY',
-        required: true,
+        required: false,
     },
     {
         component: 'datePicker',
@@ -72,5 +72,15 @@ export const scheduleFormFields: FieldConfig[] = [
         label: 'End Date',
         placeholder: 'DD/MM/YYYY',
         required: false,
+    },
+    {
+        component: 'input',
+        name: 'version',
+        label: 'Version',
+        placeholder: 'Version',
+        required: false,
+        type: 'text',
+        defaultValue: '1.00',
+        className: 'hidden', // Hidden field, not shown in form
     },
 ]

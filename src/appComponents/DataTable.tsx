@@ -13,7 +13,7 @@ import {
   Menu,
   MenuItem,
 } from '@mui/material'
-import { MoreVertical, Edit, Trash2, Eye } from 'lucide-react'
+import { MoreVertical, Edit, Trash2, Eye, Copy } from 'lucide-react'
 import { useState } from 'react'
 
 interface Column {
@@ -32,6 +32,7 @@ interface DataTableProps {
   onEdit?: (row: any) => void
   onDelete?: (row: any) => void
   onView?: (row: any) => void
+  onDuplicate?: (row: any) => void
   selectable?: boolean
   onSelectAll?: (selected: boolean) => void
   onSelectRow?: (row: any, selected: boolean) => void
@@ -45,6 +46,7 @@ const DataTable = ({
   onEdit,
   onDelete,
   onView,
+  onDuplicate,
   selectable = false,
   onSelectAll,
   onSelectRow,
@@ -92,7 +94,7 @@ const DataTable = ({
   }
 
   const isAllSelected = rows.length > 0 && selectedRows.length === rows.length
-  const hasActions = Boolean(onEdit || onDelete || onView)
+  const hasActions = Boolean(onEdit || onDelete || onView || onDuplicate)
 
   return (
     <>
@@ -203,6 +205,12 @@ const DataTable = ({
           <MenuItem onClick={() => { onEdit(selectedRow); handleMenuClose() }}>
             <Edit size={16} style={{ marginRight: 8 }} />
             Edit
+          </MenuItem>
+        )}
+        {onDuplicate && (
+          <MenuItem onClick={() => { onDuplicate(selectedRow); handleMenuClose() }}>
+            <Copy size={16} style={{ marginRight: 8 }} />
+            Duplicate
           </MenuItem>
         )}
         {onDelete && (
