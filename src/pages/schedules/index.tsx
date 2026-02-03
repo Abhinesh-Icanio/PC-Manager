@@ -202,8 +202,7 @@ const Schedules = () => {
         // You can update the schedules state if needed: setSchedules([...schedules, ...newSchedules])
 
         setBulkUploadOpen(false)
-        // Show success message
-        alert(`Successfully uploaded ${newSchedules.length} schedule(s)`)
+
     }
 
     const handleBulkUploadCancel = () => {

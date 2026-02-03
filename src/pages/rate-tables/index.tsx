@@ -8,6 +8,7 @@ import {
 } from '@mui/material'
 import { Download, Edit, FileText, Plus, Search, Upload } from 'lucide-react'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import AppMenu from '../../appComponents/AppMenu'
 import AppSelect from '../../appComponents/AppSelect'
 import AppTable from '../../appComponents/AppTable'
@@ -23,6 +24,7 @@ interface RateTable {
 }
 
 const RateTables = () => {
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [scheduleFilter, setScheduleFilter] = useState('All')
   const [statusFilter, setStatusFilter] = useState('All')
@@ -127,7 +129,7 @@ const RateTables = () => {
                 label: 'Manual Creation',
                 icon: FileText,
                 onClick: () => {
-                  console.log('Manual creation')
+                  navigate('/rate-tables/create')
                 },
               },
               {
@@ -135,7 +137,7 @@ const RateTables = () => {
                 label: 'Bulk Upload',
                 icon: Upload,
                 onClick: () => {
-                  console.log('Bulk upload')
+                  navigate('/rate-tables/create')
                 },
               },
             ]}
